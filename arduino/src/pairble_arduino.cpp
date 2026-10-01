@@ -10,6 +10,8 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
 
+#include "pairble.h"
+
 // Arduino releases the Bluetooth memory at startup unless the application
 // says it uses BLE (a weak bleInUse() in esp32-hal-bt.c); pairble's first
 // start would then crash the controller ("HLI Magic mismatch").
@@ -57,4 +59,40 @@ extern "C" void pairble_platform_wifi_init(void)
   ev.event_info.wifi_sta_disconnected.reason = WIFI_REASON_UNSPECIFIED;
   Network.postEvent(&ev);
   waitForStatus(WL_DISCONNECTED);
+}
+
+// Improv Wi-Fi over an Arduino serial port: a task reads it and hands the bytes
+// to pairble; pairble writes the answers back. Stream's methods are safe to
+// call from another task.
+static void improvWrite(const uint8_t *data, size_t len, void *ctx)
+{
+  static_cast<Stream *>(ctx)->write(data, len);
+}
+
+static void improvReader(void *arg)
+{
+  Stream *serial = static_cast<Stream *>(arg);
+  uint8_t buf[64];
+  for (;;)
+  {
+    size_t n = 0;
+    while (n < sizeof(buf) && serial->available() > 0)
+    {
+      int c = serial->read();
+      if (c < 0)
+        break;
+      buf[n++] = (uint8_t)c;
+    }
+    if (n > 0)
+      pairble_improv_input(buf, n);
+    else
+      vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
+void pairbleImprovSerial(Stream &serial, const char *url, const char *firmware, const char *version)
+{
+  pairble_improv_set_firmware(firmware, version);
+  if (pairble_improv_start(improvWrite, &serial, url) == ESP_OK)
+    xTaskCreate(improvReader, "pairble_serial", 2560, &serial, 4, nullptr);
 }

@@ -233,6 +233,35 @@ menu "pairble: Wi-Fi provisioning"
                 without a reset.
     endchoice
 
+    config PAIRBLE_IMPROV_UART
+        bool "Improv Wi-Fi over serial on a UART"
+        default n
+        help
+            Speaks Improv Wi-Fi's serial protocol on a UART, so the ESP Web
+            Tools installer (flash in the browser, then set Wi-Fi),
+            improv-wifi.com and Home Assistant can set the network over USB.
+            The network is treated like one from a phone: the stored one
+            stays until the new one works. Log output on the same UART is
+            fine. For USB Serial/JTAG consoles, or Arduino, feed the port to
+            pairble_improv_input() yourself (see pairble.h).
+
+            Whoever has the USB cable can change the network: the serial port
+            has no security of its own, by Improv's design.
+
+    config PAIRBLE_IMPROV_UART_NUM
+        int "UART"
+        default 0
+        range 0 2
+        depends on PAIRBLE_IMPROV_UART
+
+    config PAIRBLE_IMPROV_URL
+        string "Address to offer once online ({ip} = the device's)"
+        default ""
+        depends on PAIRBLE_IMPROV_UART
+        help
+            For example "http://{ip}/" for a device with its own web page.
+            Empty: none.
+
     config PAIRBLE_REBOOT_AFTER_SUCCESS
         bool "Reboot after successful provisioning"
         default y

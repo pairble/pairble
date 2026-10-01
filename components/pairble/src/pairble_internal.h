@@ -51,3 +51,6 @@ esp_err_t pairble_nvs_erase(const char *key);
 bool pairble_power_cycles_reached(void);
 /* Starts watching CONFIG_PAIRBLE_SETUP_BUTTON_GPIO, if there is one. */
 esp_err_t pairble_button_start(void);
+
+/* pairble_improv.c: Improv on CONFIG_PAIRBLE_IMPROV_UART_NUM. */
+esp_err_t pairble_improv_uart_start(void);

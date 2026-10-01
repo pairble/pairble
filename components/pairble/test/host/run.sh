@@ -10,3 +10,6 @@ trap 'rm -rf "$out"' EXIT
 ${CC:-cc} -std=c11 -Wall -Wextra -Werror -g -fsanitize=address,undefined -fno-sanitize-recover=all \
     -I "$here/../../src" "$here/test_text.c" "$here/../../src/pairble_text.c" -o "$out/test_text"
 "$out/test_text"
+${CC:-cc} -std=c11 -Wall -Wextra -Werror -g -fsanitize=address,undefined -fno-sanitize-recover=all \
+    -I "$here/../../src" "$here/test_improv.c" "$here/../../src/pairble_improv_proto.c" -o "$out/test_improv"
+"$out/test_improv"

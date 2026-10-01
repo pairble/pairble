@@ -1070,6 +1070,9 @@ esp_err_t pairble_start(const pairble_config_t *config)
         boot_mode = SETUP_MANUAL;
     }
     ESP_RETURN_ON_ERROR(pairble_button_start(), TAG, "setup button GPIO %d", CONFIG_PAIRBLE_SETUP_BUTTON_GPIO);
+#if CONFIG_PAIRBLE_IMPROV_UART
+    ESP_RETURN_ON_ERROR(pairble_improv_uart_start(), TAG, "Improv on UART %d", CONFIG_PAIRBLE_IMPROV_UART_NUM);
+#endif
 
     if (pairble_is_provisioned() && !into_setup) {
         ESP_LOGI(TAG, "credentials stored, connecting");
@@ -1105,6 +1108,11 @@ bool pairble_is_provisioned(void)
 bool pairble_is_setup_open(void)
 {
     return s_provisioning;
+}
+
+bool pairble_is_online(void)
+{
+    return s_online;
 }
 
 const char *pairble_setup_url(void)

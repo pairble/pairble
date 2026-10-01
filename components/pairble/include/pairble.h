@@ -194,6 +194,9 @@ bool pairble_is_provisioned(void);
  *  should not go to deep sleep while it is. */
 bool pairble_is_setup_open(void);
 
+/** True while the station has an IP address. */
+bool pairble_is_online(void);
+
 /** Opens setup again on a provisioned device, for the application's own
  *  button or menu ("change Wi-Fi network"). The device stays on the stored
  *  network until a phone connects to set it up, falls back to it if the
@@ -228,6 +231,34 @@ esp_err_t pairble_open_setup(void);
  *  already running. */
 esp_err_t pairble_set_network(const char *ssid, const char *password, uint32_t timeout_ms);
 
+/** Writes bytes to the serial port Improv runs on. Called from pairble's own
+ *  task. */
+typedef void (*pairble_improv_write_t)(const uint8_t *data, size_t len, void *ctx);
+
+/** Improv Wi-Fi over serial (https://www.improv-wifi.com/serial/): the ESP
+ *  Web Tools installer, improv-wifi.com and Home Assistant can then set the
+ *  network over USB. The network goes through pairble_set_network(), so the
+ *  stored one stays until the new one works.
+ *
+ *  The application reads the port and hands every byte to
+ *  pairble_improv_input() (log lines on the same port are fine); replies go
+ *  to `write`. `url` is offered to open once online, "{ip}" standing for the
+ *  device's address (e.g. "http://{ip}/"); NULL for none.
+ *  CONFIG_PAIRBLE_IMPROV_UART does all of this on a UART by itself, and the
+ *  Arduino library has pairbleImprovSerial(Serial).
+ *
+ *  The serial port has no security of its own: whoever holds the cable holds
+ *  the device. */
+esp_err_t pairble_improv_start(pairble_improv_write_t write, void *ctx, const char *url);
+
+/** The firmware name and version Improv reports. By default the app
+ *  description's (PROJECT_NAME and PROJECT_VER) - which under Arduino are
+ *  the core's, so set them there. */
+void pairble_improv_set_firmware(const char *name, const char *version);
+
+/** Bytes received on Improv's serial port. Call from one task only. */
+void pairble_improv_input(const uint8_t *data, size_t len);
+
 /** Closes setup early and frees its RAM. */
 esp_err_t pairble_stop(void);
 
@@ -239,3 +270,14 @@ esp_err_t pairble_reset_credentials(void);
 #ifdef __cplusplus
 }
 #endif
+
+#if defined(__cplusplus) && defined(ARDUINO)
+class Stream;
+/** Arduino: Improv Wi-Fi over this serial port (see pairble_improv_start()),
+ *  read and answered in the background. Call after Serial.begin() and
+ *  pairble_start(). `url` as for pairble_improv_start(); `firmware` and
+ *  `version` are what the installer shows. */
+void pairbleImprovSerial(Stream &serial, const char *url = nullptr, const char *firmware = nullptr,
+                         const char *version = nullptr);
+#endif
+
