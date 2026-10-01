@@ -29,9 +29,14 @@ With a network stored the board connects; without one it opens setup and
 knows about the connection - `WiFi.status()`, `WiFi.localIP()`, `WiFi.SSID()`,
 `WiFi.RSSI()` and `WiFi.scanNetworks()` work, and so do `HTTPClient` and
 `WiFiClient`. Just don't connect with `WiFi.begin()`: pairble owns the
-station. A network from elsewhere - Improv over serial, a keypad - goes
-through `pairble_set_network()`, which keeps the old one until the new one
-works. To switch Wi-Fi off before deep sleep, call
+station. A network from elsewhere - a keypad, a menu - goes through
+`pairble_set_network()`, which keeps the old one until the new one works.
+
+For web installers such as ESP Web Tools, call
+`pairbleImprovSerial(Serial)` after `pairble_start()`: the board then speaks
+Improv Wi-Fi on that port, with the same safety. Optional arguments are the
+URL shown after success (`{ip}` is replaced) and the firmware name and
+version the installer displays. Without the call, Improv is not there. To switch Wi-Fi off before deep sleep, call
 `esp_wifi_stop()` rather than `WiFi.disconnect()`, so it does not count as the
 network being gone.
 

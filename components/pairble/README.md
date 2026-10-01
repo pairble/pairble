@@ -33,9 +33,13 @@ void app_main(void)
   `pairble_open_setup()` open it on request.
 - **Clear errors:** wrong password and network not found are told apart, and
   the person can retry without starting over.
-- **Other ways in:** `pairble_set_network()` takes a network from a serial
-  protocol such as Improv, a keypad or a menu, with the same safety: the old
-  network stays until the new one works.
+- **Improv over USB:** with `CONFIG_PAIRBLE_IMPROV_UART` (off by default) the
+  device speaks [Improv Wi-Fi](https://www.improv-wifi.com/serial/) on the
+  console UART, so web installers such as ESP Web Tools can set the network
+  right after flashing.
+- **Other ways in:** `pairble_set_network()` takes a network from a keypad, a
+  menu or your own protocol, with the same safety as Bluetooth and Improv: the
+  old network stays until the new one works.
 - **pairble.com is free to use, in production too**, and is the default setup
   address. See Kconfig for everything else.
 
