@@ -25,6 +25,9 @@
 #include <stdint.h>
 #include "esp_err.h"
 #include "sdkconfig.h"
+#if __has_include("pairble_arduino_config.h")
+#include "pairble_arduino_config.h"  /* the Arduino library: menuconfig defaults */
+#endif
 
 /*
  * BLE is mandatory (design decision R1). A target without Bluetooth must fail
@@ -206,6 +209,24 @@ bool pairble_is_setup_open(void);
  *  CONFIG_PAIRBLE_BT_MEMORY_RELEASE_ALL this restarts the device into setup
  *  instead, and does not return. */
 esp_err_t pairble_open_setup(void);
+
+/** Hands setup a network from somewhere other than a phone - a serial
+ *  protocol such as Improv, a keypad, the application's own menu. It is
+ *  treated exactly like one a phone sent: the stored network stays until this
+ *  one works, a failure is reported (PAIRBLE_EVENT_FAILED and its reason)
+ *  and another can be tried, success replaces the stored network and, with
+ *  reboot_after_success, restarts the device.
+ *
+ *  Setup must be open (see pairble_is_setup_open()). `password` may be NULL
+ *  or "" for an open network.
+ *
+ *  With `timeout_ms` 0 it returns at once: ESP_OK means the attempt started.
+ *  Otherwise it waits for the outcome - ESP_OK once the device is on the new
+ *  network, ESP_ERR_WIFI_PASSWORD or ESP_ERR_WIFI_SSID when it failed,
+ *  ESP_ERR_TIMEOUT - so call it from an application task, never from an
+ *  event handler. ESP_ERR_INVALID_STATE: setup is not open, or an attempt is
+ *  already running. */
+esp_err_t pairble_set_network(const char *ssid, const char *password, uint32_t timeout_ms);
 
 /** Closes setup early and frees its RAM. */
 esp_err_t pairble_stop(void);

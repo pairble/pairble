@@ -84,30 +84,16 @@ See [`examples/basic`](examples/basic),
 
 ## Arduino and PlatformIO
 
-pairble is an ESP-IDF component; on PlatformIO it works in an ESP-IDF
-project (`framework = espidf`) and in Arduino as an ESP-IDF component
-(`framework = arduino, espidf`, the [pioarduino](https://github.com/pioarduino/platform-espressif32)
-platform, ESP-IDF 5). [`examples/platformio`](examples/platformio) is a
-ready ESP-IDF project; note that PlatformIO takes the partition table from
-`board_build.partitions`, not from `sdkconfig`, and the default 1 MB app
-partition is too small. The plain Arduino framework cannot build it: its
-ESP-IDF comes precompiled, without menuconfig. With Arduino, four things are
-needed - all found building a real Arduino firmware on it:
-
-1. **Tell Arduino that BLE is in use**, or it releases the Bluetooth memory
-   at startup and the controller crashes on its first start ("HLI Magic
-   mismatch"): `extern "C" bool bleInUse(void) { return true; }`
-2. **Override `espressif/network_provisioning`**: Arduino 3.x pins 1.0.2 on
-   ESP-IDF 5; pairble needs 1.2.5, which also fixes malformed-message bugs
-   reachable over Bluetooth. In the project's `idf_component.yml`, give the
-   dependency an `override_path` to a copy of 1.2.5.
-3. In `sdkconfig.defaults`: `CONFIG_BT_ENABLED=y`, `CONFIG_BT_NIMBLE_ENABLED=y`,
-   and what Arduino itself expects - `CONFIG_COMPILER_CXX_EXCEPTIONS=y`,
-   `CONFIG_COMPILER_CXX_RTTI=y`, `CONFIG_MBEDTLS_PSK_MODES=y` and
-   `CONFIG_MBEDTLS_KEY_EXCHANGE_PSK=y` (without them `NetworkClientSecure`
-   does not link).
-4. Call `pairble_start()` before anything touches Arduino's `WiFi` object,
-   and switch Wi-Fi off with `esp_wifi_stop()` rather than `WiFi.disconnect()`.
+- **Arduino** (arduino-esp32 3.x, Arduino IDE or PlatformIO): the
+  [`pairble-arduino`](arduino) library, built from this component by
+  `arduino/build.sh`. Add it, call `pairble_start()`; settings that ESP-IDF
+  takes from menuconfig are build flags there. In PlatformIO it needs the
+  [pioarduino](https://github.com/pioarduino/platform-espressif32) platform,
+  as the stock `espressif32` platform still ships arduino-esp32 2.x.
+- **PlatformIO with ESP-IDF** (`framework = espidf`):
+  [`examples/platformio`](examples/platformio) is a ready project. PlatformIO
+  takes the partition table from `board_build.partitions`, not from
+  `sdkconfig`, and the default 1 MB app partition is too small.
 
 ## Supported targets
 

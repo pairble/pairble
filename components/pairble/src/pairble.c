@@ -74,6 +74,7 @@ static esp_timer_handle_t s_reboot_timer;
 static esp_timer_handle_t s_finish_timer;
 static network_prov_mgr_config_t s_mgr_cfg;
 static bool s_mgr_ready;       /* network_prov_mgr_init() done, not yet deinit */
+static bool s_from_app;        /* the attempt running came from pairble_set_network() */
 static bool s_bt_released;     /* BLE memory gone for good: reopening needs a reset */
 static volatile bool s_opening;
 static volatile bool s_closing;  /* stop requested, NETWORK_PROV_END not yet seen */
@@ -581,6 +582,7 @@ static void on_prov_event(void *arg, esp_event_base_t base, int32_t id, void *da
     }
 
     case NETWORK_PROV_WIFI_CRED_FAIL: {
+        s_from_app = false;
         /* Deliberately not the manager's reason. The event data is a
          * snapshot taken before the manager updates it (on ESP-IDF 5.x's
          * built-in component), and even the getter only knows five raw
@@ -620,6 +622,11 @@ static void on_prov_event(void *arg, esp_event_base_t base, int32_t id, void *da
         s_succeeded = true;
         pairble_nvs_erase("prev");
         emit(PAIRBLE_EVENT_SUCCESS, PAIRBLE_FAIL_NONE);
+        if (s_from_app) {
+            /* No phone to wait for: the application has its answer. */
+            s_from_app = false;
+            finish_soon(500);
+        }
         break;
 
     case NETWORK_PROV_END: {
@@ -635,6 +642,7 @@ static void on_prov_event(void *arg, esp_event_base_t base, int32_t id, void *da
         s_mgr_ready = false;
         s_ap_clients = 0;
         s_client_connected = false;
+        s_from_app = false;
         s_recovery = false;
         s_closing = false;
         pairble_nvs_erase("prev");
@@ -805,6 +813,13 @@ static esp_err_t resolve_name(const char *given, const char *prefix)
 
 /* ---- the plumbing an application may or may not have set up already ----- */
 
+/* For a platform layer with its own idea of Wi-Fi - the Arduino library: it
+ * initialises Wi-Fi here, its way, and leaves it stopped for pairble to start.
+ * Nothing in ESP-IDF. */
+__attribute__((weak)) void pairble_platform_wifi_init(void)
+{
+}
+
 static esp_err_t ensure_system(void)
 {
     /* Returns ESP_OK if the application initialised NVS already. */
@@ -828,6 +843,7 @@ static esp_err_t ensure_system(void)
         return err;
     }
 
+    pairble_platform_wifi_init();
     if (esp_netif_get_handle_from_ifkey("WIFI_STA_DEF") == NULL) {
         esp_netif_create_default_wifi_sta();
     }
@@ -1149,6 +1165,47 @@ static esp_err_t request_setup(setup_mode_t mode)
 esp_err_t pairble_open_setup(void)
 {
     return request_setup(SETUP_MANUAL);
+}
+
+esp_err_t pairble_set_network(const char *ssid, const char *password, uint32_t timeout_ms)
+{
+    ESP_RETURN_ON_FALSE(ssid != NULL, ESP_ERR_INVALID_ARG, TAG, "no SSID");
+    size_t ssid_len = strnlen(ssid, 33);
+    size_t pass_len = password != NULL ? strnlen(password, 64) : 0;
+    ESP_RETURN_ON_FALSE(ssid_len >= 1 && ssid_len <= 32, ESP_ERR_INVALID_ARG, TAG, "SSID must be 1-32 bytes");
+    ESP_RETURN_ON_FALSE(pass_len <= 63, ESP_ERR_INVALID_ARG, TAG, "password must be at most 63 bytes");
+    ESP_RETURN_ON_FALSE(s_provisioning && s_mgr_ready && !s_closing, ESP_ERR_INVALID_STATE, TAG, "setup is not open");
+
+    wifi_config_t cfg = { 0 };
+    memcpy(cfg.sta.ssid, ssid, ssid_len);  /* exactly 32 bytes carries no NUL, and needs none */
+    memcpy(cfg.sta.password, password, pass_len);
+    s_from_app = true;
+    /* The path credentials from a phone take, so everything after is the same. */
+    esp_err_t err = network_prov_mgr_configure_wifi_sta(&cfg);
+    memset(&cfg, 0, sizeof(cfg));
+    if (err != ESP_OK) {
+        s_from_app = false;
+        return ESP_ERR_INVALID_STATE;  /* an attempt is running or has succeeded */
+    }
+    pairble_result_set_connecting();
+    if (timeout_ms == 0) {
+        return ESP_OK;
+    }
+
+    int64_t deadline = esp_timer_get_time() + (int64_t)timeout_ms * 1000;
+    for (;;) {
+        pairble_result_t r = pairble_current_result();
+        if (r.state == PAIRBLE_RESULT_CONNECTED) {
+            return ESP_OK;
+        }
+        if (r.state == PAIRBLE_RESULT_FAILED) {
+            return r.reason == PAIRBLE_FAIL_WRONG_PASSWORD ? ESP_ERR_WIFI_PASSWORD : ESP_ERR_WIFI_SSID;
+        }
+        if (esp_timer_get_time() >= deadline) {
+            return ESP_ERR_TIMEOUT;
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
 }
 
 esp_err_t pairble_stop(void)

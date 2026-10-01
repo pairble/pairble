@@ -33,6 +33,9 @@ void app_main(void)
   `pairble_open_setup()` open it on request.
 - **Clear errors:** wrong password and network not found are told apart, and
   the person can retry without starting over.
+- **Other ways in:** `pairble_set_network()` takes a network from a serial
+  protocol such as Improv, a keypad or a menu, with the same safety: the old
+  network stays until the new one works.
 - **pairble.com is free to use, in production too**, and is the default setup
   address. See Kconfig for everything else.
 
