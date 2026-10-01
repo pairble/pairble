@@ -37,7 +37,7 @@ let nameText = deviceName ?? t("deviceFallback");
 const JOIN_TIMEOUT_MS = 90_000;
 
 function makeConnect(): Connect | null {
-  if (params.demo) return env.kind === "ble" || env.kind === "http" ? demoConnect(params.fast) : null;
+  if (params.demo) return env.kind === "ble" || env.kind === "http" ? demoConnect(params.fast, { living: t("demoNetLiving"), cafe: t("demoNetCafe"), neighbour: t("demoNetNeighbour") }) : null;
   // Served by the device over its own access point: no proof of possession in
   // the URL, and none needed - joining the WPA2 network took it.
   if (env.kind === "http") return localConnect();

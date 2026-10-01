@@ -37,20 +37,29 @@ class DemoError extends Error {
   }
 }
 
-const NETWORKS: ScanResult[] = [
-  { ssid: "Svermigo", rssi: -58, auth: 3 },
-  { ssid: "Svermigo", rssi: -79, auth: 3 },          // the repeater: collapses into the row above
-  { ssid: "Obývák ěščř", rssi: -66, auth: 4 },
-  { ssid: "", rssi: -63, auth: 3 },                 // hidden: dropped
-  { ssid: "FRITZ!Box 7530 XY", rssi: -71, auth: 7 },
-  { ssid: "Kavárna Free", rssi: -74, auth: 0 },
-  { ssid: "Pajenicko-802.1X", rssi: -77, auth: 5 },     // enterprise: shown, not selectable
-  { ssid: "O2-Internet-42", rssi: -84, auth: 3 },
-  { ssid: "A network name that goes on for rather longer than it should", rssi: -88, auth: 3 },
-  { ssid: "Soused-Guest", rssi: -91, auth: 0 },
-];
+/** The networks in the page's language - a few are names people choose. */
+export interface DemoNames {
+  living: string; // with the language's own accented letters: SSIDs are UTF-8
+  cafe: string;
+  neighbour: string;
+}
 
-export function demoConnect(fast: boolean): Connect {
+function networks(names: DemoNames): ScanResult[] {
+  return [
+    { ssid: "Svermigo", rssi: -58, auth: 3 },
+    { ssid: "Svermigo", rssi: -79, auth: 3 },          // the repeater: collapses into the row above
+    { ssid: names.living, rssi: -66, auth: 4 },
+    { ssid: "", rssi: -63, auth: 3 },                 // hidden: dropped
+    { ssid: "FRITZ!Box 7530 XY", rssi: -71, auth: 7 },
+    { ssid: names.cafe, rssi: -74, auth: 0 },
+    { ssid: "Pajenicko-802.1X", rssi: -77, auth: 5 },     // enterprise: shown, not selectable
+    { ssid: "Internet-42", rssi: -84, auth: 3 },
+    { ssid: "A network name that goes on for rather longer than it should", rssi: -88, auth: 3 },
+    { ssid: names.neighbour, rssi: -91, auth: 0 },
+  ];
+}
+
+export function demoConnect(fast: boolean, names: DemoNames): Connect {
   const scale = fast ? 0.2 : 1;
   const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms * scale));
 
@@ -61,7 +70,7 @@ export function demoConnect(fast: boolean): Connect {
     const client: Client = {
       async scan() {
         await wait(5200);
-        return NETWORKS.map((n) => ({ ...n }));
+        return networks(names).map((n) => ({ ...n }));
       },
       async applyCredentials(s, p) {
         ssid = s;

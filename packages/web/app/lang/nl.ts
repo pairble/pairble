@@ -5,6 +5,9 @@ export const nl: Dict = {
   pageTitle: "Wifi instellen",
   deviceFallback: "je apparaat",
   demoBadge: "Demo, geen apparaat",
+  demoNetLiving: "Woonkamer ëï",
+  demoNetCafe: "Café Gratis WiFi",
+  demoNetNeighbour: "Buren-Gast",
 
   introHeading: "Verbind dit apparaat met je wifi",
   introBody: "Je browser vraagt welk apparaat je wilt gebruiken. Kies {name}.",

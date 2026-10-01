@@ -8,6 +8,10 @@ export const en = {
   pageTitle: "Set up Wi‑Fi",
   deviceFallback: "your device",
   demoBadge: "Demo, no device",
+  // Demo network names (the simulated device's scan): made up, in this language.
+  demoNetLiving: "Living room ✓",
+  demoNetCafe: "Café Free WiFi",
+  demoNetNeighbour: "Neighbour-Guest",
 
   introHeading: "Connect this device to your Wi‑Fi",
   introBody: "Your browser will ask which device to use. Choose {name}.",

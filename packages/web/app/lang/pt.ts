@@ -6,6 +6,9 @@ export const pt: Dict = {
   pageTitle: "Configurar Wi‑Fi",
   deviceFallback: "seu dispositivo",
   demoBadge: "Demonstração, sem dispositivo",
+  demoNetLiving: "Sala ãçé",
+  demoNetCafe: "Café Free",
+  demoNetNeighbour: "Vizinho-Visita",
 
   introHeading: "Conecte este dispositivo ao seu Wi‑Fi",
   introBody: "O navegador vai perguntar qual dispositivo usar. Escolha {name}.",

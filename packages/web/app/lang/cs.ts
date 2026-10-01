@@ -5,6 +5,9 @@ export const cs: Dict = {
   pageTitle: "Nastavení Wi‑Fi",
   deviceFallback: "zařízení",
   demoBadge: "Ukázka bez zařízení",
+  demoNetLiving: "Obývák ěščř",
+  demoNetCafe: "Kavárna Free",
+  demoNetNeighbour: "Soused-Guest",
 
   introHeading: "Připojte zařízení ke své Wi‑Fi",
   introBody: "Prohlížeč se zeptá, které zařízení použít. Vyberte {name}.",

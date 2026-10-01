@@ -6,6 +6,9 @@ export const fr: Dict = {
   pageTitle: "Configurer le Wi‑Fi",
   deviceFallback: "votre appareil",
   demoBadge: "Démo, sans appareil",
+  demoNetLiving: "Salon éèçà",
+  demoNetCafe: "Café WiFi Gratuit",
+  demoNetNeighbour: "Voisin-Invité",
 
   introHeading: "Connectez cet appareil à votre Wi‑Fi",
   introBody: "Votre navigateur va demander quel appareil utiliser. Choisissez {name}.",

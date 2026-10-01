@@ -5,6 +5,9 @@ export const de: Dict = {
   pageTitle: "WLAN einrichten",
   deviceFallback: "Ihr Gerät",
   demoBadge: "Demo, kein Gerät",
+  demoNetLiving: "Wohnzimmer äöü",
+  demoNetCafe: "Café Free WLAN",
+  demoNetNeighbour: "Nachbar-Gast",
 
   introHeading: "Verbinden Sie dieses Gerät mit Ihrem WLAN",
   introBody: "Ihr Browser fragt, welches Gerät verwendet werden soll. Wählen Sie {name}.",
