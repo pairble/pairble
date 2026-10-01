@@ -25,9 +25,36 @@ extern "C" bool bleInUse(void)
 // and stops it again: pairble starts it, and WiFi.status(), WiFi.SSID(),
 // WiFi.localIP(), WiFi.scanNetworks() all work. Arduino's own reconnecting
 // is off: pairble reconnects, with its own back-off.
+//
+// Except one: Arduino's STA handler reconnects once after the first lost
+// connection of a boot whatever setAutoReconnect() says (`first_connect` in
+// STA.cpp). Behind pairble's back that turns a wrong password into "network
+// not found" (its disconnect ends the attempt) and writes the station config,
+// RAM-only hints included, to flash. A made-up disconnect while Wi-Fi is
+// stopped uses it up harmlessly: its disconnect() and connect() fail.
+static bool waitForStatus(wl_status_t status)
+{
+  for (int waited = 0; waited < 1000; waited += 10)
+  {
+    if (WiFi.status() == status)
+      return true;
+    delay(10);
+  }
+  return false;
+}
+
 extern "C" void pairble_platform_wifi_init(void)
 {
   WiFi.setAutoReconnect(false);
   WiFi.mode(WIFI_STA);
   esp_wifi_stop();
+  // Arduino has seen the stop (so a late STA_STOP cannot reach pairble's
+  // handlers, registered next, and cancel what they arm).
+  waitForStatus(WL_STOPPED);
+
+  arduino_event_t ev = {};
+  ev.event_id = ARDUINO_EVENT_WIFI_STA_DISCONNECTED;
+  ev.event_info.wifi_sta_disconnected.reason = WIFI_REASON_UNSPECIFIED;
+  Network.postEvent(&ev);
+  waitForStatus(WL_DISCONNECTED);
 }

@@ -62,11 +62,9 @@ esp_err_t pairble_nimble_port_init(void)
 
 esp_err_t pairble_nimble_port_deinit(void)
 {
-    esp_err_t err = nimble_port_deinit();  /* the host, and the controller */
-#if CONFIG_BT_NIMBLE_LEGACY_VHCI_ENABLE
-    esp_nimble_hci_deinit();
-#endif
-    return err;
+    /* The host, the HCI glue (esp_nimble_deinit() calls esp_nimble_hci_deinit()
+     * itself) and the controller. */
+    return nimble_port_deinit();
 }
 
 static SemaphoreHandle_t s_hs_stopped;   /* binary: a second release is harmless */
@@ -123,7 +121,12 @@ int pairble_nimble_port_stop(void)
     /* Ends connections and advertising; the callback runs on the host task. */
     int rc = ble_hs_stop(&s_stop_listener, hs_stopped_cb, NULL);
     if (rc == 0) {
-        xSemaphoreTake(s_hs_stopped, pdMS_TO_TICKS(5000));
+        if (xSemaphoreTake(s_hs_stopped, pdMS_TO_TICKS(5000)) != pdTRUE) {
+            /* Connections may still be open: tearing the host down now would
+             * pull it from under them. Stay up; protocomm reports the error. */
+            ESP_LOGE("pairble", "Bluetooth host did not stop");
+            return BLE_HS_ETIMEOUT;
+        }
     } else if (rc != BLE_HS_EALREADY) {
         return rc;
     }

@@ -34,7 +34,9 @@
 #ifndef CONFIG_PAIRBLE_SETUP_URL
 #define CONFIG_PAIRBLE_SETUP_URL "https://pairble.com/s"
 #endif
-#if defined(CONFIG_BT_NIMBLE_ENABLED) && !defined(CONFIG_PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS)
+/* Bluetooth is NimBLE(-Arduino) on every chip here, whatever arduino-esp32's
+ * own sdkconfig says. */
+#ifndef CONFIG_PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS
 #define CONFIG_PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS 300
 #endif
 #ifndef CONFIG_PAIRBLE_WINDOW_SECONDS

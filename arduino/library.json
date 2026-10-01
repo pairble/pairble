@@ -1,5 +1,5 @@
 {
-  "name": "pairble",
+  "name": "pairble-arduino",
   "version": "@VERSION@",
   "description": "Wi-Fi setup for ESP32 over Bluetooth, nothing to install: the phone's camera opens an App Clip or a web page, the device shows the networks it can see.",
   "keywords": "wifi, provisioning, ble, bluetooth, onboarding, qr",
@@ -23,7 +23,7 @@
     {
       "owner": "h2zero",
       "name": "NimBLE-Arduino",
-      "version": "^2.3.0",
+      "version": "^2.5.1",
       "platforms": "espressif32"
     }
   ]

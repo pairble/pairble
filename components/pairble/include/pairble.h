@@ -126,13 +126,13 @@ typedef struct {
     void *user_ctx;
 } pairble_config_t;
 
-#ifdef CONFIG_PAIRBLE_SOFTAP
+#if CONFIG_PAIRBLE_SOFTAP  /* #if, not #ifdef: -D CONFIG_PAIRBLE_SOFTAP=0 must turn it off */
 #  define PAIRBLE_DEFAULT_SOFTAP true
 #else
 #  define PAIRBLE_DEFAULT_SOFTAP false
 #endif
 
-#ifdef CONFIG_PAIRBLE_REBOOT_AFTER_SUCCESS
+#if CONFIG_PAIRBLE_REBOOT_AFTER_SUCCESS
 #  define PAIRBLE_DEFAULT_REBOOT true
 #else
 #  define PAIRBLE_DEFAULT_REBOOT false

@@ -7,7 +7,7 @@ travels over an encrypted Bluetooth session. Phones that cannot use Bluetooth
 join the device's own Wi-Fi instead. See [pairble.com](https://pairble.com).
 
 This is the ESP-IDF component [pairble](https://github.com/pairble/pairble),
-packaged for Arduino. It needs **arduino-esp32 3.x** (ESP-IDF 5); in
+packaged for Arduino. It needs **arduino-esp32 3.3** or newer (ESP-IDF 5.5); in
 PlatformIO that is the [pioarduino](https://github.com/pioarduino/platform-espressif32)
 platform - the stock `espressif32` platform still ships arduino-esp32 2.x.
 
@@ -41,14 +41,17 @@ network being gone.
 platform = https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip
 framework = arduino
 board = esp32-s3-devkitc-1
-board_build.partitions = huge_app.csv   ; the default 1.25 MB app partition is too small
+board_build.partitions = huge_app.csv   ; room to grow; see below
 lib_deps = pairble/pairble-arduino
 ```
 
-Wi-Fi, Bluetooth and setup together take about 1.2 MB of flash on the
-ESP32-S3, 1.3 MB on the ESP32-C3 and 1.7 MB on the original ESP32 (whose
-Bluetooth host is bigger): more than the default 1.25 MB app partition, so
-pick a larger one (Arduino IDE: Tools > Partition Scheme > Huge APP).
+Wi-Fi, Bluetooth and setup together take about 1.1-1.2 MB of flash, which
+leaves little of the default 1.25 MB app partition for the application: pick
+a larger one (Arduino IDE: Tools > Partition Scheme > Huge APP).
+
+Built and tested with arduino-esp32 3.3 (ESP-IDF 5.5) and NimBLE-Arduino 2.5.
+The Bluetooth transport is ESP-IDF's, from that release, so the library
+refuses to build with an older core.
 
 ## Settings
 
@@ -69,9 +72,13 @@ Most can also be set at run time in `pairble_config_t`; see `pairble.h`.
 - arduino-esp32 precompiles `espressif/network_provisioning` 1.0.2. This
   library brings its own newer copy (Apache-2.0, `LICENSE.network_provisioning`),
   which replaces it at link time.
-- On the original ESP32, Arduino uses the Bluedroid Bluetooth host; dropping
-  an idle Bluetooth client after `CONFIG_PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS` works
-  with NimBLE only (ESP32-S3, -C3, -C6...).
+- Bluetooth runs on [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino)
+  on every chip, also on the original ESP32, for which arduino-esp32
+  precompiles the much larger Bluedroid (it left 45 KB of RAM with setup
+  open, against 106 KB now). An application can't use NimBLE-Arduino's
+  `NimBLEDevice` at the same time as pairble.
+- Arduino's own one-off reconnect after the first lost connection of a boot is
+  used up when pairble starts, so it never runs behind pairble's back.
 
 Generated from the pairble repository by `arduino/build.sh`; report issues
 there.

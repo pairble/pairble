@@ -164,10 +164,11 @@ static esp_err_t api_connect(httpd_req_t *req)
     }
     char body[CONNECT_BODY_MAX + 1] = {0};
     size_t got = 0;
+    int timeouts = 0;
     while (got < req->content_len) {  /* one recv returns what TCP has so far */
         int n = httpd_req_recv(req, body + got, req->content_len - got);
-        if (n == HTTPD_SOCK_ERR_TIMEOUT) {
-            continue;
+        if (n == HTTPD_SOCK_ERR_TIMEOUT && ++timeouts < 3) {
+            continue;  /* a slow client; one that never sends would hold the only worker */
         }
         if (n <= 0) {
             return ESP_FAIL;  /* the connection is gone; nothing to answer */

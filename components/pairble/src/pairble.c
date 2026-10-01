@@ -46,7 +46,11 @@
 #include "pairble_internal.h"
 #include "pairble_text.h"
 #if CONFIG_PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS > 0
+#if __has_include("nimble/nimble/host/include/host/ble_gap.h")
+#include "nimble/nimble/host/include/host/ble_gap.h"  /* the Arduino library: NimBLE-Arduino's host */
+#else
 #include "host/ble_gap.h"
+#endif
 #endif
 
 static const char *TAG = PAIRBLE_TAG;
@@ -171,8 +175,14 @@ static void on_ble_transport_event(void *arg, esp_event_base_t base, int32_t id,
         /* protocomm posts this with and without event data. */
         s_client_connected = false;
         idle_disarm();
-        /* The app and the web page let go once they have read the result. */
-        finish_soon(300);
+        /* The app and the web page hang up once they have read the result.
+         * Only then: after a lost link the phone may still come back for it,
+         * and the manager's own timeout closes setup. NimBLE reports the HCI
+         * reason with BLE_HS_ERR_HCI_BASE (0x200) added. */
+        uint16_t reason = data != NULL ? ((const protocomm_ble_event_t *)data)->disconnect_reason : 0;
+        if (reason == 0x13 || reason == 0x213) {  /* remote user terminated */
+            finish_soon(300);
+        }
     }
 }
 
@@ -209,8 +219,11 @@ static void finish_soon(uint32_t ms)
 
 void pairble_result_delivered(void)
 {
-    /* Time for the response to reach the page before the network goes. */
-    finish_soon(1500);
+    /* Time for the response to reach the page before the network goes. Not
+     * restarted by later polls, or two pages polling would keep setup open. */
+    if (s_finish_timer != NULL && !esp_timer_is_active(s_finish_timer)) {
+        finish_soon(1500);
+    }
 }
 
 static void window_expired_cb(void *arg)
@@ -608,6 +621,8 @@ static void on_prov_event(void *arg, esp_event_base_t base, int32_t id, void *da
             s_creds_received = false;  /* back to retrying the stored network */
             esp_timer_stop(s_retry_timer);
             esp_timer_start_once(s_retry_timer, (uint64_t)CONFIG_PAIRBLE_RECOVERY_RETRY_SECONDS * 1000000);
+        } else {
+            s_creds_received = false;  /* first setup: the next network may come from anywhere */
         }
         idle_arm();  /* the person may now walk away mid-retry */
         break;
@@ -1134,7 +1149,10 @@ static esp_err_t request_setup(setup_mode_t mode)
 {
     ESP_RETURN_ON_FALSE(s_initialised, ESP_ERR_INVALID_STATE, TAG, "call pairble_start() first");
     if (s_closing) {
-        return ESP_ERR_INVALID_STATE;  /* closing right now: ask again in a moment */
+        if (s_provisioning) {
+            return ESP_ERR_INVALID_STATE;  /* closing right now: ask again in a moment */
+        }
+        s_closing = false;  /* a stop that found nothing to stop */
     }
     portENTER_CRITICAL(&s_lock);
     bool busy = s_provisioning || s_opening;
@@ -1176,18 +1194,33 @@ esp_err_t pairble_set_network(const char *ssid, const char *password, uint32_t t
     ESP_RETURN_ON_FALSE(pass_len <= 63, ESP_ERR_INVALID_ARG, TAG, "password must be at most 63 bytes");
     ESP_RETURN_ON_FALSE(s_provisioning && s_mgr_ready && !s_closing, ESP_ERR_INVALID_STATE, TAG, "setup is not open");
 
+    ESP_RETURN_ON_FALSE(!s_creds_received && pairble_current_result().state != PAIRBLE_RESULT_CONNECTING,
+                        ESP_ERR_INVALID_STATE, TAG, "an attempt is running");
+
+    /* What a phone arriving does (phone_arrived()): no retry of the stored
+     * network in the middle, and a station the new config can be applied to -
+     * not one that is connected or connecting. */
+    s_creds_received = true;
+    esp_timer_stop(s_retry_timer);
+    quiet_station();
+
     wifi_config_t cfg = { 0 };
     memcpy(cfg.sta.ssid, ssid, ssid_len);  /* exactly 32 bytes carries no NUL, and needs none */
     memcpy(cfg.sta.password, password, pass_len);
     s_from_app = true;
+    pairble_result_set_connecting();  /* before: a quick failure must not be overwritten */
     /* The path credentials from a phone take, so everything after is the same. */
     esp_err_t err = network_prov_mgr_configure_wifi_sta(&cfg);
     memset(&cfg, 0, sizeof(cfg));
     if (err != ESP_OK) {
         s_from_app = false;
-        return ESP_ERR_INVALID_STATE;  /* an attempt is running or has succeeded */
+        s_creds_received = false;
+        result_set(PAIRBLE_RESULT_IDLE, PAIRBLE_FAIL_NONE);
+        if (s_recovery) {
+            esp_timer_start_once(s_retry_timer, 1000 * 1000);  /* back to the stored network */
+        }
+        return ESP_ERR_INVALID_STATE;  /* an attempt has already succeeded */
     }
-    pairble_result_set_connecting();
     if (timeout_ms == 0) {
         return ESP_OK;
     }
@@ -1202,6 +1235,7 @@ esp_err_t pairble_set_network(const char *ssid, const char *password, uint32_t t
             return r.reason == PAIRBLE_FAIL_WRONG_PASSWORD ? ESP_ERR_WIFI_PASSWORD : ESP_ERR_WIFI_SSID;
         }
         if (esp_timer_get_time() >= deadline) {
+            s_from_app = false;  /* a phone may finish this session; let it read the result */
             return ESP_ERR_TIMEOUT;
         }
         vTaskDelay(pdMS_TO_TICKS(100));

@@ -23,7 +23,12 @@ comp="$root/components/pairble"
 out=${1:?usage: arduino/build.sh <output dir>}
 mkdir -p "$out"
 out=$(cd "$out" && pwd)
-case "$out" in "$root"|"$root/components"*) echo "refusing to write into $out" >&2; exit 1 ;; esac
+# Everything in it but .git is replaced: only an empty directory or an earlier
+# output (a pairble-arduino checkout) will do.
+if [ -n "$(ls -A "$out" | grep -v '^\.git$')" ] && ! grep -qs '^name=pairble$' "$out/library.properties"; then
+    echo "refusing to clear $out: neither empty nor a pairble-arduino checkout" >&2
+    exit 1
+fi
 
 version=$(sed -n 's/^version: *"\(.*\)"/\1/p' "$comp/idf_component.yml")
 find "$out" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +  # keeps a checkout of pairble-arduino
@@ -80,10 +85,14 @@ done
 cp "$cache/idf-$IDF_COMMIT-protocomm_priv.h" "$out/src/protocomm_priv.h"
 {
     printf '%s\n' \
-        '/* protocomm'"'"'s BLE transport on NimBLE-Arduino, for the original ESP32 under' \
-        ' * Arduino (see arduino/build.sh). ESP-IDF '"$IDF_COMMIT"', components/protocomm/' \
+        '/* protocomm'"'"'s BLE transport on NimBLE-Arduino, for every chip under Arduino' \
+        ' * (see arduino/build.sh). ESP-IDF '"$IDF_COMMIT"', components/protocomm/' \
         ' * src/transports/protocomm_nimble.c, Apache-2.0, with NimBLE-Arduino'"'"'s include' \
         ' * paths. Generated - do not edit. */' \
+        '#include "esp_idf_version.h"' \
+        '#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0)' \
+        '#error "pairble needs arduino-esp32 3.3 or newer: this transport is ESP-IDF 5.5'"'"'s, and uses its private protocomm structures"' \
+        '#endif' \
         '#include "nimconfig.h"' \
         '#include "esp_err.h"' \
         '/* ESP-IDF'"'"'s NimBLE config has it; NimBLE-Arduino'"'"'s does not, and without it' \
