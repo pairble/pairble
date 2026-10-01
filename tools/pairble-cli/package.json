@@ -1,0 +1,26 @@
+{
+  "name": "pairble-cli",
+  "version": "0.0.1",
+  "description": "Generate per-device proof-of-possession and QR codes, and write them to NVS",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "pairble": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.test.json && node --test '.test-build/test/*.test.js'"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^24.0.0",
+    "@types/qrcode": "^1.5.5"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

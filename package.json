@@ -1,0 +1,18 @@
+{
+  "name": "pairble-monorepo",
+  "private": true,
+  "description": "Wi-Fi provisioning for ESP32 over BLE with no app to install",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/*",
+    "tools/pairble-cli"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

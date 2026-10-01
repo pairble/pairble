@@ -1,0 +1,42 @@
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+dependencies.lock
+*.pyc
+__pycache__/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.npmrc
+
+# Swift / Xcode
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+
+# Lokalni artefakty
+*.local
+.env
+
+# XcodeGen output
+*.xcodeproj
+.dd/
+.spm-cache/
+
+# TypeScript test build
+.test-build/
+
+
+# packages/web app build output
+packages/web/dist-app/
+
+# PairbleKit is a library; consumers resolve its dependencies themselves

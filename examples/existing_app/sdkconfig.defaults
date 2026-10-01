@@ -1,0 +1,9 @@
+# Bluetooth: BLE only, NimBLE host (smaller than Bluedroid)
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BTDM_CTRL_MODE_BLE_ONLY=y
+CONFIG_BTDM_CTRL_MODE_BR_EDR_ONLY=n
+CONFIG_BTDM_CTRL_MODE_BTDM=n
+
+# Wi-Fi + BLE + provisioning does not fit the default 1 MB app partition
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y

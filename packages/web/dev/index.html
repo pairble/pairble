@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pairble dev harness</title>
+<style>
+  :root { color-scheme: light dark; --gap: 12px; }
+  body { font: 15px/1.5 system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.1rem; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  input { font: inherit; padding: 8px; width: 100%; box-sizing: border-box; }
+  ul { list-style: none; padding: 0; }
+  li button { width: 100%; text-align: left; display: flex; justify-content: space-between; margin-bottom: 4px; }
+  pre { background: color-mix(in srgb, currentColor 8%, transparent); padding: 10px; border-radius: 8px;
+        white-space: pre-wrap; font-size: 12px; max-height: 40vh; overflow: auto; }
+  .row { display: flex; gap: var(--gap); align-items: center; margin-bottom: var(--gap); }
+</style>
+</head>
+<body>
+<h1>pairble dev harness</h1>
+<p>Not the product UI. This exercises <code>@pairble/core</code> and the Web Bluetooth
+transport against real firmware, on a desktop browser, so the wire protocol can be
+checked without a phone in the loop.</p>
+
+<div class="row">
+  <input id="pop" value="abcd1234" aria-label="proof of possession">
+  <button id="connect">Connect</button>
+</div>
+
+<ul id="networks"></ul>
+
+<div class="row" id="credentials" hidden>
+  <input id="password" type="password" placeholder="password" aria-label="password">
+  <button id="send">Send</button>
+</div>
+
+<pre id="log"></pre>
+
+<script type="importmap">
+{ "imports": { "@pairble/core": "/packages/core/dist/index.js" } }
+</script>
+<script type="module">
+import { connectOverBle } from "/packages/web/dist/index.js";
+
+const $ = (id) => document.getElementById(id);
+const started = Date.now();
+const log = (message) => {
+  $("log").textContent = `${((Date.now() - started) / 1000).toFixed(1)}s  ${message}\n` + $("log").textContent;
+  console.log("[pairble]", message);
+};
+
+let session = null;
+let chosen = null;
+
+$("connect").addEventListener("click", async () => {
+  try {
+    $("networks").replaceChildren();
+    log("opening chooser (pick PAIRBLE-*)");
+    const t0 = Date.now();
+    session = await connectOverBle({ pop: $("pop").value, namePrefix: "PAIRBLE-" });
+    log(`session established in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+
+    const t1 = Date.now();
+    const networks = await session.scan();
+    log(`device returned ${networks.length} networks in ${((Date.now() - t1) / 1000).toFixed(1)}s`);
+
+    for (const network of networks) {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.innerHTML = `<span>${network.ssid || "(hidden)"}</span>
+        <span>ch ${network.channel} · ${network.rssi} dBm${network.auth === 0 ? "" : " 🔒"}</span>`;
+      button.addEventListener("click", () => {
+        chosen = network.ssid;
+        $("credentials").hidden = false;
+        log(`selected ${chosen}`);
+      });
+      li.append(button);
+      $("networks").append(li);
+    }
+  } catch (error) {
+    log(`ERROR ${error.message}`);
+  }
+});
+
+$("send").addEventListener("click", async () => {
+  try {
+    log(`sending credentials for ${chosen}`);
+    await session.applyCredentials(chosen, $("password").value);
+    const status = await session.waitForResult((progress) => {
+      log(progress.attemptsRemaining === undefined
+        ? "connecting…"
+        : `connecting… ${progress.attemptsRemaining} attempts left`);
+    });
+    log(`ONLINE at ${status.connected?.ip}`);
+  } catch (error) {
+    log(`FAILED ${error.reason ?? ""} — ${error.message}`);
+  }
+});
+</script>
+</body>
+</html>

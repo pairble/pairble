@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: Apache-2.0
+// Spaces before ? ! : ; and inside « » are no-break (U+00A0 / U+202F).
+import type { Dict } from "./en.js";
+
+export const fr: Dict = {
+  pageTitle: "Configurer le Wi‑Fi",
+  deviceFallback: "votre appareil",
+  demoBadge: "Démo, sans appareil",
+
+  introHeading: "Connectez cet appareil à votre Wi‑Fi",
+  introBody: "Votre navigateur va demander quel appareil utiliser. Choisissez {name}.",
+  introBodyNoName: "Votre navigateur va demander quel appareil utiliser. Choisissez celui dont le nom figure sur l'étiquette.",
+  introNote: "Gardez votre téléphone près de l'appareil.",
+  introHttpHeading: "Choisissez le Wi‑Fi que cet appareil doit utiliser",
+  introHttpBody: "Votre téléphone est connecté au réseau de l'appareil lui-même. Il reviendra à votre réseau quand vous aurez terminé.",
+  connect: "Connecter",
+  start: "Commencer",
+  cancelled: "Aucun appareil n'a été choisi. Touchez Connecter et choisissez {name}.",
+  bluetoothOff: "Le Bluetooth est désactivé. Activez-le, puis touchez à nouveau Connecter.",
+  noDevice: "{name} n'est pas apparu. Vérifiez qu'il est allumé et à proximité, puis réessayez.",
+
+  connectingHeading: "Connexion à {name}",
+  connectingBody: "Établissement d'une connexion sécurisée.",
+  reconnectBody: "Choisissez à nouveau l'appareil pour continuer. La connexion a été fermée pendant que la page était inactive, pour que d'autres téléphones puissent le trouver.",
+  scanningHeading: "Recherche des réseaux Wi‑Fi",
+  scanningBody: "L'appareil vérifie quels réseaux il peut atteindre. Cela prend environ 5 secondes.",
+  scanningBodyAp: "L'appareil vérifie quels réseaux il peut atteindre. Cela peut prendre jusqu'à 30 secondes.",
+
+  listHeading: "Choisissez votre Wi‑Fi",
+  listBody: "Voici les réseaux que l'appareil peut atteindre.",
+  listEmpty: "L'appareil n'a trouvé aucun réseau. Rapprochez-le de votre routeur et recherchez à nouveau.",
+  searchAgain: "Rechercher à nouveau",
+  otherNetwork: "Autre réseau…",
+  secured: "Mot de passe requis",
+  open: "Réseau ouvert",
+  enterprise: "Authentification d'entreprise, non prise en charge",
+  signal: ["Signal faible", "Signal moyen", "Bon signal", "Excellent signal"],
+  notFound: "L'appareil n'a pas trouvé « {ssid} ». Rapprochez-le de votre routeur ou choisissez un autre réseau.",
+
+  passwordHeading: "Mot de passe pour {ssid}",
+  passwordLabel: "Mot de passe Wi‑Fi",
+  show: "Afficher",
+  hide: "Masquer",
+  join: "Rejoindre",
+  chooseAnother: "Choisir un autre réseau",
+  tooShort: "Les mots de passe Wi‑Fi comptent au moins 8 caractères.",
+  tooLong: "Les mots de passe Wi‑Fi comptent au plus 63 caractères.",
+  wrongPassword: "Ce mot de passe n'a pas fonctionné. Vérifiez-le et réessayez.",
+
+  otherHeading: "Rejoindre un autre réseau",
+  ssidLabel: "Nom du réseau",
+  passwordOptional: "Mot de passe (laissez vide pour un réseau ouvert)",
+
+  joiningHeading: "Connexion à {ssid}",
+  joiningBody: "L'appareil essaie le mot de passe. Cela peut prendre jusqu'à une demi-minute.",
+  attemptsLeft: {
+    one: "Pas encore connecté, il reste un essai.",
+    other: "Pas encore connecté, il reste {n} essais.",
+  },
+  seconds: "{s} s",
+
+  successHeading: "C'est fait, l'appareil est en ligne",
+  successBody: "Il redémarre et rejoindra « {ssid} » tout seul. Vous pouvez fermer cette page.",
+
+  wrongCodeHeading: "Ce code ne correspond pas à l'appareil",
+  wrongCodeBody: "Scannez le code imprimé sur l'appareil lui-même, puis réessayez.",
+  lostHeading: "Connexion à l'appareil perdue",
+  lostBody: "Vérifiez qu'il est allumé et à proximité, puis reconnectez-vous.",
+  connectAgain: "Se reconnecter",
+  timeoutHeading: "L'appareil ne répond plus",
+  timeoutBody: "Patientez quelques secondes, puis reconnectez-vous. Si cela se reproduit, éteignez et rallumez l'appareil.",
+  unknownHeading: "Un problème est survenu",
+  unknownBody: "Reconnectez-vous pour recommencer.",
+
+  missingHeading: "Scannez le code sur votre appareil",
+  missingBody: "Cette page a besoin du code figurant sur l'étiquette de l'appareil. Ouvrez l'appareil photo de votre téléphone et scannez-le à nouveau.",
+
+  iosHeading: "Configurez cet appareil avec l'appareil photo",
+  iosBody: "Les navigateurs sur iPhone et iPad ne peuvent pas communiquer avec les appareils Bluetooth. Ouvrez l'app Appareil photo et pointez-la vers le code sur l'appareil. Une fiche de configuration s'affichera.",
+  androidHeading: "Ouvrez cette page dans Chrome",
+  androidWebview: "Le navigateur intégré de cette app ne peut pas utiliser le Bluetooth.",
+  androidFirefox: "Firefox ne peut pas utiliser le Bluetooth.",
+  androidOther: "Ce navigateur ne peut pas utiliser le Bluetooth.",
+  openInChrome: "Ouvrir dans Chrome",
+  desktopHeading: "Ouvrez cette page dans Chrome ou Edge",
+  desktopBody: "Ce navigateur ne peut pas utiliser le Bluetooth. Utilisez Chrome ou Edge, ou scannez le code avec votre téléphone.",
+  insecureHeading: "Ouvrez la version sécurisée de cette page",
+  insecureBody: "Le Bluetooth ne fonctionne que sur les pages commençant par https://.",
+  openSecure: "Ouvrir la page sécurisée",
+};

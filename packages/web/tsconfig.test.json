@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node", "web-bluetooth"]
+  },
+  "include": ["app/params.ts", "app/networks.ts", "app/env.ts", "app/errors.ts", "app/i18n.ts", "test"]
+}

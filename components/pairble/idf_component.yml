@@ -1,0 +1,29 @@
+version: "0.3.0"
+description: "Wi-Fi provisioning for ESP32 over BLE with no app to install"
+url: "https://github.com/pairble/pairble"
+repository: "https://github.com/pairble/pairble.git"
+license: "Apache-2.0"
+documentation: "https://pairble.com"
+issues: "https://github.com/pairble/pairble/issues"
+targets:
+  - esp32
+  - esp32c2
+  - esp32c3
+  - esp32c5
+  - esp32c6
+  - esp32s3
+tags:
+  - wifi
+  - provisioning
+  - ble
+  - onboarding
+dependencies:
+  idf:
+    version: ">=5.1"
+  # Not the wifi_provisioning component built into ESP-IDF 5.x, for two
+  # reasons: it was removed from ESP-IDF 6, and on 5.x
+  # its WIFI_PROV_CRED_FAIL event reports the reason of the *previous* failure.
+  # The wire protocol is byte-identical for everything pairble sends, so the
+  # clients do not care which one is underneath.
+  espressif/network_provisioning:
+    version: "^1.2.5"

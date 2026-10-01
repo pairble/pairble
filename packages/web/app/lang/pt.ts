@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: Apache-2.0
+// Brazilian Portuguese.
+import type { Dict } from "./en.js";
+
+export const pt: Dict = {
+  pageTitle: "Configurar Wi‑Fi",
+  deviceFallback: "seu dispositivo",
+  demoBadge: "Demonstração, sem dispositivo",
+
+  introHeading: "Conecte este dispositivo ao seu Wi‑Fi",
+  introBody: "O navegador vai perguntar qual dispositivo usar. Escolha {name}.",
+  introBodyNoName: "O navegador vai perguntar qual dispositivo usar. Escolha aquele com o nome da etiqueta.",
+  introNote: "Mantenha o celular perto do dispositivo.",
+  introHttpHeading: "Escolha o Wi‑Fi que este dispositivo deve usar",
+  introHttpBody: "Seu celular está conectado à rede do próprio dispositivo. Ele voltará para a sua rede quando você terminar.",
+  connect: "Conectar",
+  start: "Começar",
+  cancelled: "Nenhum dispositivo foi escolhido. Toque em Conectar e escolha {name}.",
+  bluetoothOff: "O Bluetooth está desligado. Ative-o e toque em Conectar de novo.",
+  noDevice: "{name} não apareceu. Verifique se ele está ligado e por perto e tente novamente.",
+
+  connectingHeading: "Conectando a {name}",
+  connectingBody: "Estabelecendo uma conexão segura.",
+  reconnectBody: "Escolha o dispositivo de novo para continuar. A conexão foi encerrada enquanto a página estava inativa, para que outros celulares pudessem encontrá-lo.",
+  scanningHeading: "Procurando redes Wi‑Fi",
+  scanningBody: "O dispositivo está verificando quais redes ele alcança. Isso leva cerca de 5 segundos.",
+  scanningBodyAp: "O dispositivo está verificando quais redes ele alcança. Isso pode levar até 30 segundos.",
+
+  listHeading: "Escolha seu Wi‑Fi",
+  listBody: "Estas são as redes que o dispositivo alcança.",
+  listEmpty: "O dispositivo não encontrou nenhuma rede. Aproxime-o do roteador e busque novamente.",
+  searchAgain: "Buscar novamente",
+  otherNetwork: "Outra rede…",
+  secured: "Requer senha",
+  open: "Rede aberta",
+  enterprise: "Login corporativo, sem suporte",
+  signal: ["Sinal fraco", "Sinal razoável", "Sinal bom", "Sinal excelente"],
+  notFound: "O dispositivo não encontrou “{ssid}”. Aproxime-o do roteador ou escolha outra rede.",
+
+  passwordHeading: "Senha de {ssid}",
+  passwordLabel: "Senha do Wi‑Fi",
+  show: "Mostrar",
+  hide: "Ocultar",
+  join: "Conectar",
+  chooseAnother: "Escolher outra rede",
+  tooShort: "Senhas de Wi‑Fi têm pelo menos 8 caracteres.",
+  tooLong: "Senhas de Wi‑Fi têm no máximo 63 caracteres.",
+  wrongPassword: "Essa senha não funcionou. Confira e tente novamente.",
+
+  otherHeading: "Conectar a outra rede",
+  ssidLabel: "Nome da rede",
+  passwordOptional: "Senha (deixe em branco para rede aberta)",
+
+  joiningHeading: "Conectando a {ssid}",
+  joiningBody: "O dispositivo está testando a senha. Isso pode levar até meio minuto.",
+  attemptsLeft: {
+    one: "Ainda não conectado, resta mais uma tentativa.",
+    other: "Ainda não conectado, restam mais {n} tentativas.",
+  },
+  seconds: "{s} s",
+
+  successHeading: "Pronto, o dispositivo está on-line",
+  successBody: "Ele está reiniciando e vai se conectar a “{ssid}” sozinho. Você já pode fechar esta página.",
+
+  wrongCodeHeading: "Este código não corresponde ao dispositivo",
+  wrongCodeBody: "Escaneie o código impresso no próprio dispositivo e tente novamente.",
+  lostHeading: "A conexão com o dispositivo foi perdida",
+  lostBody: "Verifique se ele está ligado e por perto e conecte novamente.",
+  connectAgain: "Conectar novamente",
+  timeoutHeading: "O dispositivo parou de responder",
+  timeoutBody: "Aguarde alguns segundos e conecte novamente. Se continuar acontecendo, desligue e ligue o dispositivo.",
+  unknownHeading: "Algo deu errado",
+  unknownBody: "Conecte novamente para recomeçar.",
+
+  missingHeading: "Escaneie o código do seu dispositivo",
+  missingBody: "Esta página precisa do código da etiqueta do dispositivo. Abra a câmera do celular e escaneie de novo.",
+
+  iosHeading: "Use a câmera para configurar este dispositivo",
+  iosBody: "Os navegadores do iPhone e do iPad não conseguem se comunicar com dispositivos Bluetooth. Abra o app Câmera e aponte para o código no dispositivo. Um cartão de configuração vai aparecer.",
+  androidHeading: "Abra esta página no Chrome",
+  androidWebview: "O navegador integrado deste app não pode usar Bluetooth.",
+  androidFirefox: "O Firefox não pode usar Bluetooth.",
+  androidOther: "Este navegador não pode usar Bluetooth.",
+  openInChrome: "Abrir no Chrome",
+  desktopHeading: "Abra esta página no Chrome ou Edge",
+  desktopBody: "Este navegador não pode usar Bluetooth. Use o Chrome ou o Edge, ou escaneie o código com o celular.",
+  insecureHeading: "Abra a versão segura desta página",
+  insecureBody: "O Bluetooth só funciona em páginas que começam com https://.",
+  openSecure: "Abrir página segura",
+};

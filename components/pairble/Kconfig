@@ -1,0 +1,243 @@
+menu "pairble: Wi-Fi provisioning"
+
+    config PAIRBLE_SOFTAP
+        bool "Also offer setup over the device's own Wi-Fi (SoftAP)"
+        default y
+        help
+            Runs a WPA2 access point alongside BLE while setup is open, named
+            after the device, with the proof of possession as its password.
+            For phones that cannot use Bluetooth: an iPhone with no internet
+            to download the App Clip, a browser without Web Bluetooth, a
+            laptop. Costs RAM and shares the one 2.4 GHz radio with BLE.
+
+    config PAIRBLE_CAPTIVE_PORTAL
+        bool "Pop the setup page up automatically (captive portal)"
+        default y
+        depends on PAIRBLE_SOFTAP
+        help
+            Answers every DNS lookup on the access point with its own address
+            and redirects every unknown URL to the setup page, which makes most
+            phones open it on their own after joining. A convenience only: it
+            does not work behind custom DNS or a VPN, and iOS 26 has been
+            reported not to show the sheet, so always print "open
+            http://192.168.4.1" on the label too.
+
+    config PAIRBLE_SERVICE_UUID
+        string "BLE service UUID"
+        default "021a9004-0382-4aea-bff4-6b3f1c5adfb4"
+        help
+            The primary GATT service advertised while provisioning. The default
+            is the one used by the ESP-IDF provisioning example, which the
+            pairble clients also default to. Set your own for a product so
+            that the browser's chooser does not offer somebody else's device.
+
+    config PAIRBLE_NAME_PREFIX
+        string "Device name prefix"
+        default "PAIRBLE-"
+        help
+            Unless the application sets a name, the device advertises
+            "<prefix><last three bytes of the MAC>", e.g. PAIRBLE-BA6550.
+            Upper case and a hyphen by default because the name is typed by
+            hand when a QR code will not scan: no doubt about letter case, and
+            a hyphen sits on a phone's first keyboard layer, an underscore
+            does not.
+            At most 23 characters. Print the full name on the box.
+
+    config PAIRBLE_WIFI_CONN_ATTEMPTS
+        int "Connection attempts before reporting failure"
+        default 2
+        range 1 10
+        help
+            How often the device retries the credentials it was given before
+            telling the phone they failed. Measured against real hardware,
+            five attempts made a wrong password take 54 seconds to report,
+            the first 15 of them with nothing to show the user. Another retry
+            does not fix a wrong password, so keep this low.
+
+    config PAIRBLE_POP_GENERATE
+        bool "Generate a proof of possession on first boot if none is stored"
+        default y
+        help
+            With no PoP passed in and none in NVS, generate a random one on
+            first boot and keep it in NVS. Right for devices that show their
+            QR code on a display or in the log. Turn it off for products with
+            printed labels, where the PoP must come from pairble-cli so that
+            it matches the label, and a missing one is a production fault.
+
+    config PAIRBLE_LOG_SETUP_URL
+        bool "Log the setup URL and the Wi-Fi QR code"
+        default y if PAIRBLE_POP_GENERATE
+        default n
+        help
+            Both contain the proof of possession, which lets anyone in radio
+            range set the device up and join its SoftAP. Handy on a
+            development board, or for a device that generates its own PoP and
+            has nowhere else to show it; off by default for products whose
+            PoP comes printed on a label, because serial logs end up in
+            support tickets and CI output. The device name is logged either
+            way.
+
+    config PAIRBLE_SETUP_URL
+        string "Setup page URL encoded in the QR code"
+        default "https://pairble.com/s"
+        help
+            The device name and PoP are appended in the URL fragment
+            (#name=...&pop=...), which never reaches the server.
+
+            pairble.com is free to use, in production too, with no limits:
+            the setup page and the pairble App Clip are registered there.
+
+            Your own domain works as well, but an iPhone then needs an App
+            Clip of your own, approved by Apple and associated with that
+            domain - ideally as part of your own app. Write to
+            support@pairble.com to set that up.
+
+    config PAIRBLE_BLE_IDLE_TIMEOUT_SECONDS
+        int "Drop a BLE client that idles this long (0 = never)"
+        default 300
+        range 0 3600
+        depends on BT_NIMBLE_ENABLED
+        help
+            While a phone is connected the device stops advertising, so no
+            other phone can find it. Measured on hardware: a browser tab left
+            open on a failure screen kept a device invisible for 22 minutes.
+            The pairble clients let go on their own after two idle minutes;
+            this is the backstop for clients that do not.
+
+            The clock runs from the moment a phone connects, stops while the
+            device is trying credentials it received, and starts again after a
+            failed attempt, when the person may have walked away mid-retry.
+            Generous on purpose: the clients reconnect transparently, but a
+            person looking up their password should not be cut off.
+
+            NimBLE only; with Bluedroid there is no guard.
+
+    config PAIRBLE_WINDOW_SECONDS
+        int "Provisioning window in seconds (0 = until provisioned)"
+        default 0
+        help
+            How long first-time setup stays open on a device with no stored
+            network. Reopened setup (see below) has its own window.
+
+    menu "When the stored network stops working"
+
+        config PAIRBLE_RECOVERY_AFTER_SECONDS
+            int "Reopen setup after this long offline (0 = never)"
+            default 120
+            range 0 86400
+            help
+                A device that has been offline this long, counted across
+                deep sleep, opens setup again on its own - the way back for
+                someone who replaced their router or changed its password.
+
+                Nothing is erased. The stored network is retried while setup
+                is open, and setup closes as soon as it answers, so a router
+                that was merely restarting costs nothing. New credentials
+                replace the old ones only once the device has joined with
+                them.
+
+                Two minutes is longer than a typical router takes to boot.
+
+        config PAIRBLE_RECOVERY_WINDOW_SECONDS
+            int "Keep reopened setup open for (seconds)"
+            default 600
+            range 60 86400
+            help
+                After this, setup closes, the device goes back to retrying
+                the stored network, and setup reopens after another
+                PAIRBLE_RECOVERY_AFTER_SECONDS offline.
+
+        config PAIRBLE_RECOVERY_RETRY_SECONDS
+            int "While setup is open, retry the stored network every (seconds)"
+            default 30
+            range 10 600
+            help
+                Paused while a phone is connected, because the device has
+                one radio: a connection attempt would make the phone's
+                network scan fail.
+
+        config PAIRBLE_SETUP_BUTTON_GPIO
+            int "Button that reopens setup (GPIO, -1 = none)"
+            default -1
+            range -1 48
+            help
+                Holding this button reopens setup, keeping the stored
+                network. pairble configures the pin as an input with the
+                internal pull resistor. On most development boards the BOOT
+                button is GPIO 0 (GPIO 9 on ESP32-C3/C6).
+
+        config PAIRBLE_SETUP_BUTTON_ACTIVE_LOW
+            bool "The button pulls the pin low"
+            default y
+            depends on PAIRBLE_SETUP_BUTTON_GPIO >= 0
+
+        config PAIRBLE_SETUP_BUTTON_HOLD_SECONDS
+            int "Hold the button for (seconds)"
+            default 5
+            range 1 30
+            depends on PAIRBLE_SETUP_BUTTON_GPIO >= 0
+
+        config PAIRBLE_POWER_CYCLE_COUNT
+            int "Reopen setup after this many quick power cycles (0 = never)"
+            default 3
+            range 0 10
+            help
+                For devices with no button - a bulb, a plug: switching it on
+                this many times in a row, each time for less than
+                PAIRBLE_POWER_CYCLE_SECONDS, reopens setup. Power-on and
+                brownout resets count (so does pulling EN, which reports as
+                a power-on), not crashes or esp_restart(). Nothing is erased,
+                so an accidental trigger is harmless.
+
+        config PAIRBLE_POWER_CYCLE_SECONDS
+            int "A power cycle is quick if the device was on for less than (seconds)"
+            default 5
+            range 2 60
+            depends on PAIRBLE_POWER_CYCLE_COUNT > 0
+
+        config PAIRBLE_FAST_RECONNECT
+            bool "Remember the access point and channel for faster reconnects"
+            default n
+            help
+                Skips the full channel scan on the next connection by
+                aiming at the access point and channel that worked last
+                time; if that fails once, pairble forgets them and scans.
+                Worth it on battery devices that wake to send one reading.
+
+    endmenu
+
+    choice PAIRBLE_BT_MEMORY
+        prompt "Bluetooth memory after setup"
+        default PAIRBLE_BT_MEMORY_RELEASE_CLASSIC
+        help
+            Released memory can never be used by Bluetooth again until the
+            next reset, which is why the default keeps BLE's.
+
+        config PAIRBLE_BT_MEMORY_KEEP
+            bool "Keep all (the application uses Bluetooth too)"
+            help
+                For applications that use Bluetooth Classic or BLE
+                themselves once setup is over.
+
+        config PAIRBLE_BT_MEMORY_RELEASE_CLASSIC
+            bool "Release Bluetooth Classic, keep BLE"
+            help
+                pairble uses only BLE. Setup can reopen without a restart.
+                Chips without Bluetooth Classic have nothing to release.
+
+        config PAIRBLE_BT_MEMORY_RELEASE_ALL
+            bool "Release all of it"
+            help
+                The most free RAM once setup is over, but reopening setup
+                then restarts the device, because BLE cannot come back
+                without a reset.
+    endchoice
+
+    config PAIRBLE_REBOOT_AFTER_SUCCESS
+        bool "Reboot after successful provisioning"
+        default y
+        help
+            Frees the Bluetooth stack's memory for good and starts the
+            application from a clean state with the stored credentials.
+
+endmenu

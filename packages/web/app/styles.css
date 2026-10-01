@@ -1,0 +1,324 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * One column, system type, ink on paper. The only colour on the page is the
+ * status LED next to the device name - it is the thing a person glances at to
+ * know whether anything is happening, the way they would glance at the device.
+ */
+
+:root {
+  --paper: #ffffff;
+  --ink: #14213d;
+  --muted: #5b6475;
+  --hairline: #e3e6ec;
+  --field: #c9ceda;
+  --pressed: #f1f3f7;
+  --on-ink: #ffffff;
+  --led-amber: #e8a317;
+  --led-green: #1f9d55;
+  --led-red: #c93c3c;
+  --led-off: #c4c9d4;
+  --radius: 12px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1320;
+    --ink: #e8ecf4;
+    --muted: #9aa3b5;
+    --hairline: #283149;
+    --field: #3a4460;
+    --pressed: #161c2c;
+    --on-ink: #0e1320;
+    --led-off: #3a4460;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  min-height: 100dvh;
+}
+
+/* ------------------------------------------------------------ device tag -- */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px 7px 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 7px;
+  margin-bottom: 40px;
+  max-width: 100%;
+}
+
+/* Monospace here and nowhere else: this is the code printed on the label,
+ * matched character by character against the browser's device list. */
+.tag-name {
+  font: 500 15px/1.2 ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mono {
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tag-name.is-generic { font-family: inherit; letter-spacing: 0; }
+
+.led {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--led-off);
+}
+.led[data-state="waiting"],
+.led[data-state="busy"],
+.led[data-state="linked"] {
+  background: var(--led-amber);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--led-amber) 22%, transparent);
+}
+.led[data-state="waiting"] { animation: blink 1.6s steps(1, end) infinite; }
+.led[data-state="busy"] { animation: blink 0.5s steps(1, end) infinite; }
+.led[data-state="online"] {
+  background: var(--led-green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--led-green) 22%, transparent);
+}
+.led[data-state="error"] {
+  background: var(--led-red);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--led-red) 22%, transparent);
+}
+@keyframes blink { 50% { opacity: 0.25; } }
+
+/* The scan is measured at about five seconds; this fills over that long and
+ * then waits at the end rather than pretending to know more. */
+.track {
+  height: 3px;
+  margin: 24px 0 0;
+  background: var(--hairline);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.track::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 92%;
+  background: var(--ink);
+  transform-origin: left;
+  animation: fill var(--duration, 5.5s) cubic-bezier(0.3, 0.6, 0.5, 1) forwards;
+}
+@keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ----------------------------------------------------------------- text --- */
+
+h1 {
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+/* Headings receive focus only programmatically, for screen readers. They are
+   not controls and not in the tab order, so no ring - Chrome otherwise treats
+   focus moved before any pointer input as focus-visible and draws one. */
+h1:focus,
+h1:focus-visible { outline: none; }
+
+p { margin: 0 0 16px; }
+.lede { color: var(--muted); }
+.hint { color: var(--muted); font-size: 15px; margin-top: 16px; }
+
+.notice {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--led-red);
+  background: var(--pressed);
+  border-radius: 0 8px 8px 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -------------------------------------------------------------- buttons --- */
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 20px;
+  margin-top: 24px;
+  border-radius: var(--radius);
+  border: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.button.primary { background: var(--ink); color: var(--on-ink); }
+.button.primary:active { transform: translateY(1px); }
+.button.quiet {
+  width: auto;
+  min-height: 44px;
+  justify-content: flex-start;
+  padding: 10px 0;
+  background: none;
+  color: var(--ink);
+  font-weight: 500;
+  margin-top: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.button:focus-visible,
+.net:focus-visible,
+.reveal:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------- networks --- */
+
+.networks {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+.networks li { border-bottom: 1px solid var(--hairline); }
+
+.net {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.net:active:not(:disabled) { background: var(--pressed); }
+.net:disabled { cursor: default; color: var(--muted); }
+.net-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.net-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.net-note { font-size: 13px; }
+.net-meta { display: inline-flex; align-items: center; gap: 10px; flex: none; }
+.net-other .net-name { color: var(--muted); }
+
+.bars { width: 20px; height: 16px; }
+.bars rect { fill: var(--hairline); }
+.bars rect.on { fill: currentColor; }
+.lock { width: 12px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.lock rect { fill: currentColor; stroke: none; }
+
+/* ---------------------------------------------------------------- forms --- */
+
+.form { margin-top: 4px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.input-wrap { position: relative; }
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--field);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.input-wrap .input { padding-right: 88px; }
+.input[aria-invalid="true"] { border-color: var(--led-red); }
+.reveal {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  bottom: 4px;
+  min-width: 72px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+.field-error { color: var(--led-red); font-size: 15px; margin: -8px 0 0; min-height: 0; }
+.field-error:empty { display: none; }
+
+/* ---------------------------------------------------------------- timer --- */
+
+.timer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 8px 0 20px;
+  font-variant-numeric: tabular-nums;
+}
+.timer-value { font-size: 56px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; }
+.timer-unit { font-size: 21px; color: var(--muted); }
+.attempts:empty { display: none; }
+
+/* ----------------------------------------------------------------- demo --- */
+
+.demo {
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--pressed);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .led { animation: none !important; }
+  .track { display: none; }
+  .button.primary:active { transform: none; }
+}
+
+@media (min-width: 640px) {
+  .app { padding-top: 56px; }
+}
