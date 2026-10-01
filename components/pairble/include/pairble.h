@@ -97,7 +97,7 @@ typedef struct {
     const char *name_prefix;
 
     /* Proof of possession: the secret on the label, mixed into the session key.
-     * NULL (the default) reads it from NVS, where pairble-cli puts a unique one
+     * NULL (the default) reads it from NVS, where @pairble/cli puts a unique one
      * per unit, and if there is none generates one on first boot and stores it
      * (unless CONFIG_PAIRBLE_POP_GENERATE is off). A string set here is the same
      * on every unit built from this firmware: fine for a one-off, not for a

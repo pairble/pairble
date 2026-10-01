@@ -1,5 +1,5 @@
 {
-  "name": "pairble-cli",
+  "name": "@pairble/cli",
   "version": "0.0.1",
   "description": "Generate per-device proof-of-possession and QR codes, and write them to NVS",
   "license": "Apache-2.0",

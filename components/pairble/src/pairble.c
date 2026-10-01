@@ -732,7 +732,7 @@ static void on_wifi_event(void *arg, esp_event_base_t base, int32_t id, void *da
 /* ---- proof of possession ------------------------------------------------ */
 
 #if CONFIG_PAIRBLE_POP_GENERATE
-/* Crockford base32 without I, L, O and U - the same alphabet pairble-cli uses,
+/* Crockford base32 without I, L, O and U - the same alphabet @pairble/cli uses,
  * so a generated code survives being read off a display and typed in.
  *
  * Twelve characters, 60 bits. Guessing online costs a BLE handshake each, but
@@ -775,7 +775,7 @@ static esp_err_t resolve_pop(const char *given)
         ESP_RETURN_ON_ERROR(pairble_nvs_set_pop(s_pop), TAG, "could not store the generated PoP");
         ESP_LOGI(TAG, "generated a proof of possession for this unit");
 #else
-        ESP_LOGE(TAG, "no proof of possession in NVS; provision one with pairble-cli");
+        ESP_LOGE(TAG, "no proof of possession in NVS; provision one with @pairble/cli");
         return ESP_ERR_NOT_FOUND;
 #endif
     }
@@ -812,7 +812,7 @@ static esp_err_t ensure_system(void)
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         /* The partition is unusable as it stands; this is the recovery every
          * ESP-IDF example performs, and the one an application would. */
-        /* Which takes a PoP flashed by pairble-cli with it: loud, because the
+        /* Which takes a PoP flashed by @pairble/cli with it: loud, because the
          * printed label stops working (or a new one is generated). */
         ESP_LOGE(TAG, "NVS unusable (%s), erasing it - including the proof of possession",
                  esp_err_to_name(err));

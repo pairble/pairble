@@ -30,7 +30,7 @@ Both speak Espressif's [protocomm](https://docs.espressif.com/projects/esp-idf/e
 | [`components/pairble`](components/pairble) | ESP-IDF component on `espressif/network_provisioning`. `pairble_start()` is the whole integration. |
 | [`packages/core`](packages/core) | `@pairble/core` — protocol client in TypeScript: hand-written protobuf, security 1 on WebCrypto, scan / config / status. No DOM, no Node APIs. |
 | [`packages/web`](packages/web) | `@pairble/web` — Web Bluetooth and HTTP transports, plus the setup page: one self-contained file, 26 KB gzipped, in ten languages. |
-| [`tools/pairble-cli`](tools/pairble-cli) | Production line: per-unit PoP, device name, QR code, NVS image. |
+| [`tools/cli`](tools/cli) | `@pairble/cli` — production line: per-unit PoP, device name, QR code, NVS image. |
 
 The iPhone side is the pairble App Clip, run by pairble at
 [pairble.com](https://pairble.com): every device whose QR code points there -
@@ -74,7 +74,7 @@ on their own. It is WPA2 with the proof of possession as its password. Turn it
 off with `config.softap = false` or in menuconfig.
 
 The proof of possession - the secret in the QR code - comes from NVS if
-[`pairble-cli`](tools/pairble-cli) wrote one at manufacturing, which is what a
+[`@pairble/cli`](tools/cli) wrote one at manufacturing, which is what a
 printed label needs. Otherwise the device generates one on first boot and keeps
 it, which suits devices that show their QR code on a display.
 

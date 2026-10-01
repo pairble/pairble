@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Where the proof of possession lives: written at manufacturing time by
- * pairble-cli so it matches a printed label, or generated on first boot for
+ * @pairble/cli so it matches a printed label, or generated on first boot for
  * devices that show their QR code themselves.
  */
 

@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "workspaces": [
     "packages/*",
-    "tools/pairble-cli"
+    "tools/cli"
   ],
   "engines": {
     "node": ">=20"

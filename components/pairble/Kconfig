@@ -61,7 +61,7 @@ menu "pairble: Wi-Fi provisioning"
             With no PoP passed in and none in NVS, generate a random one on
             first boot and keep it in NVS. Right for devices that show their
             QR code on a display or in the log. Turn it off for products with
-            printed labels, where the PoP must come from pairble-cli so that
+            printed labels, where the PoP must come from @pairble/cli so that
             it matches the label, and a missing one is a production fault.
 
     config PAIRBLE_LOG_SETUP_URL
