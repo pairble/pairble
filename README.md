@@ -38,6 +38,17 @@ the default - works with it, in production too and at no cost. An App Clip of
 your own on your own domain is possible; it needs Apple's approval, ideally as
 part of your own app. Write to support@pairble.com.
 
+## Install
+
+```sh
+idf.py add-dependency "pairble/pairble^0.3.0"     # ESP-IDF, from the ESP Component Registry
+```
+
+- **Arduino IDE:** Library Manager → search "pairble".
+- **PlatformIO (Arduino):** `lib_deps = pairble/pairble-arduino`, with the
+  [pioarduino](https://github.com/pioarduino/platform-espressif32) platform.
+- **Web and tooling:** `npm install @pairble/web`, `npx @pairble/cli`.
+
 ## Quick start (firmware)
 
 ```c

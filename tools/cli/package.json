@@ -1,8 +1,24 @@
 {
   "name": "@pairble/cli",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Generate per-device proof-of-possession and QR codes, and write them to NVS",
   "license": "Apache-2.0",
+  "homepage": "https://pairble.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pairble/pairble.git",
+    "directory": "tools/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/pairble/pairble/issues"
+  },
+  "keywords": [
+    "esp32",
+    "provisioning",
+    "qr-code",
+    "nvs",
+    "manufacturing"
+  ],
   "type": "module",
   "bin": {
     "pairble": "./dist/cli.js"
@@ -22,5 +38,8 @@
   },
   "dependencies": {
     "qrcode": "^1.5.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

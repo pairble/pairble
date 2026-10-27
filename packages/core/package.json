@@ -1,8 +1,24 @@
 {
   "name": "@pairble/core",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Transport-agnostic ESP32 provisioning client: protocomm, Security1, scan and config",
   "license": "Apache-2.0",
+  "homepage": "https://pairble.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pairble/pairble.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/pairble/pairble/issues"
+  },
+  "keywords": [
+    "esp32",
+    "provisioning",
+    "protocomm",
+    "wifi",
+    "iot"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,5 +37,8 @@
   "devDependencies": {
     "@types/node": "^26.6.3",
     "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

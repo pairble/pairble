@@ -11,6 +11,12 @@ packaged for Arduino. It needs **arduino-esp32 3.3** or newer (ESP-IDF 5.5); in
 PlatformIO that is the [pioarduino](https://github.com/pioarduino/platform-espressif32)
 platform - the stock `espressif32` platform still ships arduino-esp32 2.x.
 
+## Install
+
+- **Arduino IDE:** Tools > Manage Libraries, search "pairble". NimBLE-Arduino
+  comes with it.
+- **PlatformIO:** `lib_deps = pairble/pairble-arduino` (full example below).
+
 ## Use
 
 ```cpp

@@ -1,8 +1,24 @@
 {
   "name": "@pairble/web",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Web Bluetooth and SoftAP transports plus the pairble provisioning UI",
   "license": "Apache-2.0",
+  "homepage": "https://pairble.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pairble/pairble.git",
+    "directory": "packages/web"
+  },
+  "bugs": {
+    "url": "https://github.com/pairble/pairble/issues"
+  },
+  "keywords": [
+    "esp32",
+    "provisioning",
+    "web-bluetooth",
+    "wifi",
+    "iot"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,12 +35,15 @@
     "test": "tsc -p tsconfig.test.json && node --test '.test-build/test/*.test.js'"
   },
   "dependencies": {
-    "@pairble/core": "0.0.1"
+    "@pairble/core": "0.3.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
     "@types/web-bluetooth": "^0.0.20",
     "esbuild": "^0.28.2",
     "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

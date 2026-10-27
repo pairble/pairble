@@ -23,6 +23,10 @@ void app_main(void)
 }
 ```
 
+```sh
+idf.py add-dependency "pairble/pairble^0.3.0"
+```
+
 - **The whole integration is one call.** NVS, networking and Wi-Fi are set up
   if the application has not, and left alone if it has.
 - **A plan B:** at the same time as Bluetooth the device opens its own WPA2
