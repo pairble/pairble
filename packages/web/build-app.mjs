@@ -52,12 +52,13 @@ const appleMeta = appId && clipId
   ? `<meta name="apple-itunes-app" content="app-id=${appId}, app-clip-bundle-id=${clipId}, app-clip-display=card">`
   : "";
 
-const html = readFileSync(resolve(here, "app/index.html"), "utf8")
+const page = (meta) => readFileSync(resolve(here, "app/index.html"), "utf8")
   .replace("__CSP__", csp)
-  .replace("__APPLE_APP_META__", appleMeta)
+  .replace("__APPLE_APP_META__", meta)
   .replace("__CSS__", () => css)
   .replace("__JS__", () => script)
   .replace(/\n{2,}/g, "\n");
+const html = page(appleMeta);
 
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, html);
@@ -66,11 +67,13 @@ const raw = Buffer.byteLength(html);
 const gzipped = gzipSync(html, { level: 9 });
 console.log(`dist-app/index.html  ${(raw / 1024).toFixed(1)} KB raw, ${(gzipped.length / 1024).toFixed(1)} KB gzip`);
 
-// The same file, compressed, for the firmware to serve over its access point.
+// The same page, compressed, for the firmware to serve over its access point -
+// without the App Store banner: on the device's own network there is no App
+// Store to reach, and the component must not depend on how pairble.com is built.
 // Committed with the component so that building firmware needs no Node. Node
 // writes no timestamp into the gzip header, so the bytes only change when the
 // page does - which keeps it honest to check in.
 const embedded = resolve(here, "../../components/pairble/web/setup.html.gz");
 mkdirSync(dirname(embedded), { recursive: true });
-writeFileSync(embedded, gzipped);
-console.log(`components/pairble/web/setup.html.gz  ${(gzipped.length / 1024).toFixed(1)} KB`);
+writeFileSync(embedded, gzipSync(page(""), { level: 9 }));
+console.log(`components/pairble/web/setup.html.gz  written`);
