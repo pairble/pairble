@@ -1,6 +1,6 @@
 dependencies:
   # In your own project, from the ESP Component Registry:
-  #   pairble/pairble: "^0.3.0"
+  #   pairble/pairble: "^0.4.0"
   # Here, the copy in this repository:
   pairble/pairble:
     version: "*"

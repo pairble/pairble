@@ -24,7 +24,7 @@ void app_main(void)
 ```
 
 ```sh
-idf.py add-dependency "pairble/pairble^0.3.0"
+idf.py add-dependency "pairble/pairble^0.4.0"
 ```
 
 - **The whole integration is one call.** NVS, networking and Wi-Fi are set up

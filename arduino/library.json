@@ -1,8 +1,8 @@
 {
   "name": "pairble-arduino",
   "version": "@VERSION@",
-  "description": "Wi-Fi setup for ESP32 over Bluetooth, nothing to install: the phone's camera opens an App Clip or a web page, the device shows the networks it can see.",
-  "keywords": "wifi, provisioning, ble, bluetooth, onboarding, qr",
+  "description": "Wi-Fi setup for ESP32 and Raspberry Pi Pico W over Bluetooth, nothing to install: the phone's camera opens an App Clip or a web page, the device shows the networks it can see.",
+  "keywords": "wifi, provisioning, ble, bluetooth, onboarding, qr, pico w, rp2040",
   "repository": {
     "type": "git",
     "url": "https://github.com/pairble/pairble-arduino.git"
@@ -10,7 +10,7 @@
   "homepage": "https://pairble.com",
   "license": "Apache-2.0",
   "frameworks": "arduino",
-  "platforms": "espressif32",
+  "platforms": ["espressif32", "raspberrypi"],
   "headers": "pairble.h",
   "build": {
     "libArchive": false,

@@ -1,6 +1,6 @@
 # pairble
 
-> **Scan the code, join the network.** Wi-Fi onboarding for ESP32 over Bluetooth, with nothing to install.
+> **Scan the code, join the network.** Wi-Fi onboarding for ESP32 and the Raspberry Pi Pico W over Bluetooth, with nothing to install.
 
 The user scans a QR code on the box. They see the Wi-Fi networks **the device itself can see**, pick one, type the password, and the device is online. On Android that screen is a web page using Web Bluetooth; on iPhone it is an App Clip. No app store visit on either.
 
@@ -28,6 +28,7 @@ Both speak Espressif's [protocomm](https://docs.espressif.com/projects/esp-idf/e
 | Path | What it is |
 |---|---|
 | [`components/pairble`](components/pairble) | ESP-IDF component on `espressif/network_provisioning`. `pairble_start()` is the whole integration. |
+| [`arduino`](arduino) | The Arduino library, [pairble-arduino](https://github.com/pairble/pairble-arduino): the component for arduino-esp32, and an implementation of the same protocol and API for the Raspberry Pi Pico W and Pico 2 W (arduino-pico). |
 | [`packages/core`](packages/core) | `@pairble/core` — protocol client in TypeScript: hand-written protobuf, security 1 on WebCrypto, scan / config / status. No DOM, no Node APIs. |
 | [`packages/web`](packages/web) | `@pairble/web` — Web Bluetooth and HTTP transports, plus the setup page: one self-contained file, 26 KB gzipped, in ten languages. |
 | [`tools/cli`](tools/cli) | `@pairble/cli` — production line: per-unit PoP, device name, QR code, NVS image. |
@@ -41,12 +42,14 @@ part of your own app. Write to support@pairble.com.
 ## Install
 
 ```sh
-idf.py add-dependency "pairble/pairble^0.3.0"     # ESP-IDF, from the ESP Component Registry
+idf.py add-dependency "pairble/pairble^0.4.0"     # ESP-IDF, from the ESP Component Registry
 ```
 
 - **Arduino IDE:** Library Manager → search "pairble".
 - **PlatformIO (Arduino):** `lib_deps = pairble/pairble-arduino`, with the
-  [pioarduino](https://github.com/pioarduino/platform-espressif32) platform.
+  [pioarduino](https://github.com/pioarduino/platform-espressif32) platform
+  (ESP32) or [maxgerhardt's](https://github.com/maxgerhardt/platform-raspberrypi)
+  with the earlephilhower core (Pico W).
 - **Web and tooling:** `npm install @pairble/web`, `npx @pairble/cli`.
 
 ## Quick start (firmware)
@@ -101,6 +104,10 @@ See [`examples/basic`](examples/basic),
   takes from menuconfig are build flags there. In PlatformIO it needs the
   [pioarduino](https://github.com/pioarduino/platform-espressif32) platform,
   as the stock `espressif32` platform still ships arduino-esp32 2.x.
+- **Raspberry Pi Pico W and Pico 2 W** (arduino-pico, with Bluetooth): the
+  same library and the same API, so one sketch builds for both; call
+  `pairble_loop()` from `loop()`. See the library's
+  [README](arduino/README.md#pico-w).
 - **PlatformIO with ESP-IDF** (`framework = espidf`):
   [`examples/platformio`](examples/platformio) is a ready project. PlatformIO
   takes the partition table from `board_build.partitions`, not from
@@ -117,6 +124,8 @@ Bluetooth LE is mandatory: targets without it fail at compile time.
 | ESP32-C2 (ESP8684) | BLE 5.3; tight on RAM |
 | ESP32-C5 | also 5 GHz, so the scan can list networks the product may not want |
 | ESP32-S2 | **not supported** — no Bluetooth |
+| Raspberry Pi Pico W | Arduino only (arduino-pico 6.3+, "IPv4 + Bluetooth") |
+| Raspberry Pi Pico 2 W | as the Pico W; builds, not yet tried on hardware |
 
 Requires ESP-IDF 5.1 or later (5.5 for the ESP32-C5); tested with 5.4 and 5.5.
 

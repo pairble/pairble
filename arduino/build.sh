@@ -4,6 +4,13 @@
 #
 #   arduino/build.sh <output dir>
 #
+# One library for two architectures: the ESP32 (this component, as below) and
+# the Raspberry Pi Pico W / Pico 2 W (arduino/rp2040, its own implementation
+# of the same protocol and API). The Arduino IDE and PlatformIO compile every
+# source in src/ whatever the board, so each file is wrapped in its
+# architecture's #if; pairble.h picks the header. Shared by both: the text
+# helpers, Improv's framing and the setup page.
+#
 # Arduino has no menuconfig, no EMBED_FILES and an older
 # espressif/network_provisioning (1.0.2) precompiled into arduino-esp32 3.x.
 # The library therefore carries:
@@ -35,8 +42,17 @@ find "$out" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +  # keeps a ch
 mkdir -p "$out/src" "$out/examples"
 
 # pairble itself
-cp "$comp"/src/*.c "$comp"/src/*.h "$comp/include/pairble.h" "$out/src/"
-cp "$here"/src/* "$out/src/"
+cp "$comp"/src/*.c "$comp"/src/*.h "$out/src/"
+cp "$comp/include/pairble.h" "$out/src/pairble_esp32.h"
+cp "$here"/src/* "$out/src/"   # pairble.h: picks pairble_esp32.h or pairble_rp2040.h
+# NimBLE-Arduino's host, named outright. The component's __has_include picks
+# it only once the library is on the include path, and the Arduino IDE and
+# arduino-cli add a library when a file includes one of its headers - which
+# pairble.c is compiled too early to see on the original ESP32, whose core has
+# no NimBLE headers of its own to fall back to. nimconfig.h is at the top of
+# NimBLE-Arduino's src/, so including it is what adds the library.
+perl -0pi -e 's|#if __has_include\("nimble/nimble/host/include/host/ble_gap.h"\)\n(#include "nimble/nimble/host/include/host/ble_gap.h"[^\n]*)\n#else\n#include "host/ble_gap.h"\n#endif\n|#include "nimconfig.h"\n$1\n|' "$out/src/pairble.c"
+grep -q '^#include "nimconfig.h"$' "$out/src/pairble.c" || { echo "pairble.c: NimBLE include block not found" >&2; exit 1; }
 cp -R "$here/examples/." "$out/examples/"
 cp "$root/LICENSE" "$root/NOTICE" "$here/README.md" "$out/"
 printf '.pio/\n.DS_Store\n' > "$out/.gitignore"
@@ -138,4 +154,23 @@ open(sys.argv[2], 'w').write(
     '    ".previous\\n");\n')
 PY
 
-echo "pairble $version for Arduino (network_provisioning $NP_VERSION) in $out"
+# The Pico W
+for f in "$here"/rp2040/*; do
+    cp "$f" "$out/src/"
+done
+
+# Each source compiled only for its architecture; the shared three for both.
+for f in "$out"/src/*.c "$out"/src/*.cpp; do
+    name=$(basename "$f")
+    case "$name" in
+        pairble_text.c|pairble_improv_proto.c|pairble_setup_page.c) continue ;;
+        pairble_pico*.cpp) cond='defined(ARDUINO_ARCH_RP2040)' ;;
+        *) cond='defined(ESP_PLATFORM)' ;;
+    esac
+    { printf '#if %s  /* pairble: this architecture only (arduino/build.sh) */\n' "$cond"
+      cat "$f"
+      printf '\n#endif\n'; } > "$f.tmp"
+    mv "$f.tmp" "$f"
+done
+
+echo "pairble $version for Arduino (ESP32, network_provisioning $NP_VERSION; Pico W) in $out"

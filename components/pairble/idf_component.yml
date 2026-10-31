@@ -1,4 +1,4 @@
-version: "0.3.0"
+version: "0.4.0"
 description: "Wi-Fi provisioning for ESP32 over BLE with no app to install"
 url: "https://github.com/pairble/pairble"
 repository: "https://github.com/pairble/pairble.git"

@@ -1,8 +1,11 @@
-// pairble, the smallest integration.
+// pairble, the smallest integration. Builds for ESP32 boards and for the
+// Raspberry Pi Pico W / Pico 2 W (Tools > IP/Bluetooth Stack: "IPv4 +
+// Bluetooth").
 //
 // With a network stored the board connects to it; without one it opens setup
-// and prints the URL to put in a QR code. Switch the board on three times in
-// a row, each time for less than 5 seconds, to open setup again.
+// and prints the URL to put in a QR code. On an ESP32, switch the board on
+// three times in a row, each time for less than 5 seconds, to open setup
+// again.
 
 #include <pairble.h>
 
@@ -32,13 +35,16 @@ void setup()
   Serial.begin(115200);
   pairble_config_t config = PAIRBLE_CONFIG_DEFAULT();
   config.event_cb = onPairble;
-  ESP_ERROR_CHECK(pairble_start(&config));
+  if (pairble_start(&config) != PAIRBLE_OK)
+    Serial.println("pairble did not start");
   Serial.printf("Device %s\n", pairble_device_name());
 }
 
 void loop()
 {
-  // Nothing to do here: pairble runs in the background. Use Arduino's
-  // networking (HTTPClient, WiFiClient...) once it reports Online.
-  delay(1000);
+  // On an ESP32 pairble runs in the background and this does nothing; the
+  // Pico W needs it. Use Arduino's networking (HTTPClient, WiFiClient...)
+  // once it reports Online.
+  pairble_loop();
+  delay(10);
 }
